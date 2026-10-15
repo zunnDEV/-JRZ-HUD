@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="id" class="bg-[#050507] text-zinc-100 scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Egg ESP v10.1 Purple Edition</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        html, body { overflow-x: hidden; max-width: 100vw; }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        @keyframes float {
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-14px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes floatShadow {
+            0%   { transform: translateX(-50%) scale(1); opacity: 0.5; }
+            50%  { transform: translateX(-50%) scale(0.75); opacity: 0.2; }
+            100% { transform: translateX(-50%) scale(1); opacity: 0.5; }
+        }
+        @keyframes floatGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50%      { opacity: 0.7; transform: scale(1.05); }
+        }
+        .float-text { animation: float 4s ease-in-out infinite; will-change: transform; }
+        .float-shadow { animation: floatShadow 4s ease-in-out infinite; }
+        .float-glow { animation: floatGlow 4s ease-in-out infinite; }
+
+        .gradient-purple {
+            background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #7e22ce 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .code-scroll { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        .code-scroll::-webkit-scrollbar { display: none; }
+
+        /* ==== NAVBAR ==== */
+        .navbar-float {
+            background: #08080a;
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            border-radius: 9999px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.7),
+                -30px 0 50px -15px rgba(168, 85, 247, 0.5),
+                30px 0 50px -15px rgba(168, 85, 247, 0.5),
+                0 0 0 1px rgba(168, 85, 247, 0.06) inset;
+        }
+        .navbar-float::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            background: 
+                radial-gradient(ellipse 40% 100% at 0% 50%, rgba(168, 85, 247, 0.55) 0%, rgba(168, 85, 247, 0.15) 40%, transparent 70%),
+                radial-gradient(ellipse 40% 100% at 100% 50%, rgba(168, 85, 247, 0.55) 0%, rgba(168, 85, 247, 0.15) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .navbar-float::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(168, 85, 247, 0.8) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .navbar-content { position: relative; z-index: 2; }
+
+        /* ==== HAMBURGER ICON (bars -> X) ==== */
+        .hamburger-icon {
+            position: relative;
+            width: 16px;
+            height: 14px;
+            display: block;
+        }
+        .hamburger-icon span {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 1.5px;
+            background: currentColor;
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .hamburger-icon span:nth-child(1) { top: 0; }
+        .hamburger-icon span:nth-child(2) { top: 50%; transform: translateY(-50%); }
+        .hamburger-icon span:nth-child(3) { bottom: 0; }
+        
+        .hamburger-active .hamburger-icon span:nth-child(1) { top: 50%; transform: translateY(-50%) rotate(45deg); }
+        .hamburger-active .hamburger-icon span:nth-child(2) { opacity: 0; transform: translateY(-50%) scaleX(0); }
+        .hamburger-active .hamburger-icon span:nth-child(3) { bottom: 50%; transform: translateY(50%) rotate(-45deg); }
+
+        /* ==== MOBILE DROPDOWN MENU (DI LUAR navbar-float) ==== */
+        .mobile-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: #08080a;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.8),
+                0 0 40px -10px rgba(168, 85, 247, 0.5);
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-origin: top center;
+            z-index: 100;
+        }
+        .mobile-menu.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .mobile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #a1a1aa;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(63, 63, 70, 0.3);
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .mobile-menu-item:last-child { border-bottom: none; }
+        .mobile-menu-item:hover, .mobile-menu-item:active {
+            background: rgba(168, 85, 247, 0.08);
+            color: #ffffff;
+            padding-left: 24px;
+        }
+        .mobile-menu-item i { width: 18px; text-align: center; color: #a855f7; font-size: 13px; }
+
+        /* ==== ANIMASI MUNCUL ==== */
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .reveal-scale {
+            opacity: 0; transform: scale(0.9);
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal-scale.active { opacity: 1; transform: scale(1); }
+
+        @keyframes iconPop {
+            0%   { opacity: 0; transform: scale(0.5) rotate(-15deg); }
+            70%  { transform: scale(1.1) rotate(5deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0); }
+        }
+        .icon-pop { opacity: 0; }
+        .icon-pop.active { animation: iconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        .egg-item {
+            transition: all 0.3s ease;
+            padding: 6px 10px; border-radius: 8px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: #a1a1aa;
+        }
+        .egg-item:hover { background: rgba(168, 85, 247, 0.08); color: #e4e4e7; transform: translateX(4px); }
+        .egg-item i { font-size: 10px; opacity: 0.6; transition: opacity 0.3s ease; }
+        .egg-item:hover i { opacity: 1; }
+
+        .rarity-card { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease; }
+        .rarity-card:hover { transform: translateY(-4px); border-color: rgba(168, 85, 247, 0.3); box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.2); }
+
+        .game-card { transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+        .game-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 30px -10px rgba(168, 85, 247, 0.3);
+        }
+        .game-card img { transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        .game-card:hover img { transform: scale(1.05); }
+    </style>
+</head>
+<body class="font-sans antialiased selection:bg-purple-500/30 overflow-x-hidden w-full">
+
+    <!-- 🌟 NAVBAR WRAPPER 🌟 -->
+    <div class="fixed top-3 sm:top-5 left-0 right-0 z-50 px-3 sm:px-6 pointer-events-none">
+        <!-- Wrapper relative (biar menu bisa posisi absolute di bawahnya) -->
+        <div class="max-w-5xl mx-auto relative pointer-events-auto">
+            
+            <!-- Navbar Pill -->
+            <nav class="navbar-float">
+                <div class="navbar-content flex justify-between items-center pl-3 pr-2 sm:pl-5 sm:pr-3 py-2 sm:py-2.5">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <!-- SVG Community Icon -->
+                        <div class="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-purple-600/30 to-zinc-900 rounded-full flex items-center justify-center border border-purple-500/40 shrink-0 shadow-[0_0_12px_-2px_rgba(168,85,247,0.6)]">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div class="leading-tight">
+                            <div class="font-semibold text-xs sm:text-sm text-white whitespace-nowrap">Egg ESP</div>
+                            <div class="text-[9px] sm:text-[10px] text-purple-300/70 font-medium">v10.1</div>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex items-center gap-7 text-sm text-zinc-400 font-medium">
+                        <a href="#features" class="hover:text-white transition">Features</a>
+                        <a href="#preview" class="hover:text-white transition">Preview</a>
+                        <a href="#rarity" class="hover:text-white transition">Rarity</a>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="#" class="hidden sm:inline-flex bg-white text-black px-4 py-2 rounded-full hover:bg-zinc-200 transition text-xs font-semibold">Get Script</a>
+                        
+                        <!-- ✅ Hamburger Button -->
+                        <button id="hamburgerBtn" type="button" aria-label="Menu" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-zinc-800/60 border border-purple-500/30 text-purple-300 hover:bg-zinc-800 active:scale-95 transition relative z-10">
+                            <div class="hamburger-icon">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- ✅ MOBILE MENU — di LUAR navbar-float biar gak ke-clip -->
+            <div id="mobileMenu" class="mobile-menu md:hidden">
+                <a href="#features" class="mobile-menu-item"><i class="fa-solid fa-bolt"></i><span>Features</span></a>
+                <a href="#preview" class="mobile-menu-item"><i class="fa-solid fa-display"></i><span>Preview UI</span></a>
+                <a href="#kategori" class="mobile-menu-item"><i class="fa-solid fa-layer-group"></i><span>Kategori</span></a>
+                <a href="#rarity" class="mobile-menu-item"><i class="fa-solid fa-gem"></i><span>Rarity</span></a>
+                <a href="#" class="mobile-menu-item" style="color: #c084fc;"><i class="fa-solid fa-download" style="color: #c084fc;"></i><span>Get Script</span></a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section class="relative pt-32 sm:pt-40 md:pt-44 pb-16 sm:pb-24 px-4 sm:px-6 max-w-4xl mx-auto text-center w-full">
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[300px] sm:w-[500px] h-[250px] sm:h-[300px] bg-purple-600/15 blur-[100px] sm:blur-[120px] rounded-full pointer-events-none float-glow"></div>
+        <div class="relative z-10 w-full">
+            
+            <!-- ✅ BADGE — Dot `·` diganti mini logo code brackets -->
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-[10px] sm:text-xs text-zinc-400 font-medium mb-8 sm:mb-10 backdrop-blur-sm reveal-scale" data-reveal>
+                <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                <span>Script community</span>
+                <!-- Mini logo code brackets -->
+                <span class="inline-flex items-center justify-center w-4 h-4 rounded bg-purple-500/15 border border-purple-500/30 text-purple-300">
+                    <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </span>
+                <span>Built for Roblox</span>
+            </div>
+
+            <div class="relative inline-block mb-10 sm:mb-12 w-full max-w-full px-2 reveal" data-reveal data-delay="100">
+                <h1 class="float-text font-extrabold tracking-tight text-white leading-[1.05] text-[2rem] sm:text-5xl md:text-6xl lg:text-7xl break-words">
+                    Egg ESP <span class="text-zinc-600 font-light">v10.1</span>
+                    <br>
+                    <span class="gradient-purple">Purple Edition</span>
+                </h1>
+                <div class="float-shadow absolute -bottom-4 sm:-bottom-6 left-1/2 w-2/3 sm:w-3/4 h-6 sm:h-8 bg-purple-600/50 blur-2xl rounded-full pointer-events-none"></div>
+            </div>
+            <p class="text-sm sm:text-base md:text-lg text-zinc-400 max-w-2xl mx-auto mb-10 sm:mb-12 leading-relaxed px-2 reveal" data-reveal data-delay="200">
+                Advanced ESP script with infinite long range, auto-detect rarity for 28 eggs, and performance mode. Tema ungu eksklusif, UI clean.
+            </p>
+            <div class="max-w-2xl mx-auto bg-[#0c0c0e]/80 backdrop-blur-sm border border-zinc-800 rounded-xl overflow-hidden shadow-2xl shadow-purple-500/5 mb-10 w-full reveal-scale" data-reveal data-delay="300">
+                <div class="flex items-center px-3 sm:px-4 py-2.5 sm:py-3 bg-zinc-900/40 border-b border-zinc-800">
+                    <div class="flex gap-1.5 sm:gap-2">
+                        <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-zinc-700"></div>
+                        <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-zinc-700"></div>
+                        <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-zinc-700"></div>
+                    </div>
+                    <span class="ml-3 sm:ml-4 text-[10px] sm:text-xs text-zinc-500 font-mono">Loadstring</span>
+                </div>
+                <div class="flex items-center gap-2 p-2 pl-3 sm:pl-5">
+                    <code class="code-scroll text-[10px] sm:text-sm text-zinc-300 font-mono flex-1 whitespace-nowrap">loadstring(game:HttpGet("https://sirius.menu/gen2"))()</code>
+                    <button onclick="navigator.clipboard.writeText('loadstring(game:HttpGet(\'https://sirius.menu/gen2\'))()'); this.innerHTML='<i class=\'fa-solid fa-check\'></i> <span class=\'hidden sm:inline\'>Copied</span>'; setTimeout(()=>this.innerHTML='<i class=\'fa-regular fa-copy\'></i> <span class=\'hidden sm:inline\'>Copy</span>', 2000)" class="bg-white text-black px-3 sm:px-4 py-2 rounded-lg text-[10px] sm:text-xs font-semibold hover:bg-zinc-200 transition flex items-center gap-1.5 sm:gap-2 shrink-0">
+                        <i class="fa-regular fa-copy"></i> <span class="hidden sm:inline">Copy</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-wrap justify-center gap-x-4 gap-y-3 sm:gap-8 text-xs sm:text-sm text-zinc-500 font-medium px-2">
+                <span class="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap reveal" data-reveal data-delay="400"><i class="fa-solid fa-crosshairs text-zinc-400"></i> Infinite Range</span>
+                <span class="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap reveal" data-reveal data-delay="500"><i class="fa-solid fa-gem text-zinc-400"></i> 28 Egg Rarity</span>
+                <span class="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap reveal" data-reveal data-delay="600"><i class="fa-solid fa-gauge-high text-zinc-400"></i> FPS Mode</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- PREVIEW UI -->
+    <section id="preview" class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 w-full">
+        <div class="text-center mb-8 sm:mb-12 reveal" data-reveal>
+            <h2 class="text-xl sm:text-2xl font-bold mb-2 text-white">Clean Interface</h2>
+            <p class="text-zinc-500 text-xs sm:text-sm">Tampilan UI Rayfield yang rapi dan mudah digunakan.</p>
+        </div>
+        <div class="rounded-2xl border border-zinc-800 bg-[#0c0c0e]/60 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/50 reveal-scale" data-reveal data-delay="150">
+            <div class="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-zinc-800 bg-zinc-900/30">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-zinc-700"></div>
+                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-zinc-700"></div>
+                    <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-zinc-700"></div>
+                </div>
+                <div class="text-[10px] sm:text-xs text-zinc-500 font-medium tracking-wide truncate">Egg ESP - Control Panel</div>
+                <div class="w-4"></div>
+            </div>
+            <div class="flex flex-col md:flex-row">
+                <div class="w-full md:w-56 border-b md:border-b-0 md:border-r border-zinc-800 p-2 sm:p-4 flex md:block gap-1 overflow-x-auto code-scroll">
+                    <div class="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 bg-zinc-800/50 rounded-lg text-white text-xs sm:text-sm font-medium cursor-pointer transition whitespace-nowrap shrink-0"><i class="fa-solid fa-house w-4 text-center text-zinc-400"></i> Main</div>
+                    <div class="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 hover:bg-zinc-800/30 rounded-lg text-zinc-400 hover:text-white text-xs sm:text-sm cursor-pointer transition whitespace-nowrap shrink-0"><i class="fa-solid fa-gem w-4 text-center"></i> Rarity</div>
+                    <div class="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 hover:bg-zinc-800/30 rounded-lg text-zinc-400 hover:text-white text-xs sm:text-sm cursor-pointer transition whitespace-nowrap shrink-0"><i class="fa-solid fa-paint-roller w-4 text-center"></i> Visual</div>
+                    <div class="flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 hover:bg-zinc-800/30 rounded-lg text-zinc-400 hover:text-white text-xs sm:text-sm cursor-pointer transition whitespace-nowrap shrink-0"><i class="fa-solid fa-gauge-high w-4 text-center"></i> Performance</div>
+                </div>
+                <div class="flex-1 p-4 sm:p-6 md:p-8">
+                    <h3 class="text-xs sm:text-sm font-semibold text-white mb-4 sm:mb-6">Main Control</h3>
+                    <div class="space-y-2.5 sm:space-y-3">
+                        <div class="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/50 gap-3">
+                            <div class="min-w-0"><div class="text-xs sm:text-sm font-medium text-zinc-200">Enable ESP</div><div class="text-[10px] sm:text-xs text-zinc-500 mt-0.5">Highlight all eggs in range</div></div>
+                            <div class="w-10 h-6 bg-purple-500 rounded-full relative cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.4)] shrink-0"><div class="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/50 gap-3">
+                            <div class="min-w-0"><div class="text-xs sm:text-sm font-medium text-zinc-200">Show Distance</div><div class="text-[10px] sm:text-xs text-zinc-500 mt-0.5">Display studs distance</div></div>
+                            <div class="w-10 h-6 bg-purple-500 rounded-full relative cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.4)] shrink-0"><div class="w-4 h-4 bg-white rounded-full absolute right-1 top-1"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 sm:p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/50 gap-3">
+                            <div class="min-w-0"><div class="text-xs sm:text-sm font-medium text-zinc-200">Smooth Visual</div><div class="text-[10px] sm:text-xs text-zinc-500 mt-0.5">Change material to SmoothPlastic</div></div>
+                            <div class="w-10 h-6 bg-zinc-700 rounded-full relative cursor-pointer shrink-0"><div class="w-4 h-4 bg-zinc-400 rounded-full absolute left-1 top-1"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24 w-full">
+        <div class="mb-8 sm:mb-12 reveal" data-reveal>
+            <h2 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-white">Everything you need.</h2>
+            <p class="text-zinc-500 text-sm">Fitur lengkap untuk memaksimalkan gameplay lu.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+            <div class="p-5 sm:p-6 rounded-xl bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700 transition reveal-scale" data-reveal>
+                <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-300 mb-4 border border-zinc-700 icon-pop" data-icon><i class="fa-solid fa-crosshairs text-lg"></i></div>
+                <h3 class="text-sm sm:text-base font-semibold text-white mb-1">Infinite Long Range</h3>
+                <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">Jarak pandang ESP tidak terbatas. Dilengkapi info jarak presisi (studs) dari karakter ke egg secara real-time.</p>
+            </div>
+            <div class="p-5 sm:p-6 rounded-xl bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700 transition reveal-scale" data-reveal data-delay="100">
+                <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-300 mb-4 border border-zinc-700 icon-pop" data-icon><i class="fa-solid fa-gem text-lg"></i></div>
+                <h3 class="text-sm sm:text-base font-semibold text-white mb-1">Auto-Detect Rarity</h3>
+                <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">Sistem otomatis mendeteksi 28 jenis egg dan mengelompokkannya berdasarkan rarity. Warna Highlight menyesuaikan rarity.</p>
+            </div>
+            <div class="p-5 sm:p-6 rounded-xl bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700 transition reveal-scale" data-reveal data-delay="200">
+                <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-300 mb-4 border border-zinc-700 icon-pop" data-icon><i class="fa-solid fa-gauge-high text-lg"></i></div>
+                <h3 class="text-sm sm:text-base font-semibold text-white mb-1">Performance Mode</h3>
+                <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">Fitur pengurang lag. Mengatur kecepatan update ESP agar tidak membebani performa game.</p>
+            </div>
+            <div class="p-5 sm:p-6 rounded-xl bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700 transition reveal-scale" data-reveal data-delay="300">
+                <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-300 mb-4 border border-zinc-700 icon-pop" data-icon><i class="fa-solid fa-paint-roller text-lg"></i></div>
+                <h3 class="text-sm sm:text-base font-semibold text-white mb-1">Visual Settings</h3>
+                <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">Mode Smooth Visual buat ngehilangin tekstur kasar di game. Bisa juga matiin Decoration Terrain.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- KATEGORY -->
+    <section id="kategori" class="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20 w-full">
+        <div class="mb-8 sm:mb-10 reveal" data-reveal>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-900/20 border border-purple-500/20 text-[10px] sm:text-xs text-purple-300 font-medium tracking-widest uppercase mb-4">
+                <i class="fa-solid fa-layer-group text-purple-400"></i> Kategori
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-white">GAME</h2>
+            <p class="text-zinc-400 text-sm sm:text-base max-w-2xl">Built for the games you play.</p>
+            <p class="text-zinc-500 text-xs sm:text-sm max-w-2xl mt-2 leading-relaxed">ESP EGG supports selected Roblox experiences, with compatibility and optimization maintained per game.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            <div class="game-card rounded-2xl border border-zinc-800 bg-zinc-900/30 overflow-hidden reveal-scale" data-reveal data-delay="100">
+                <div class="relative aspect-video overflow-hidden bg-zinc-900">
+                    <img src="https://cdn.imagetourls.com/uploads/tyImg/XC7gzDqX.webp" alt="Ride A Pet - Roblox Game" class="w-full h-full object-cover" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-3 left-3 flex items-center gap-2 z-10">
+                        <div class="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.8)]"><i class="fa-solid fa-check text-white text-[10px]"></i></div>
+                    </div>
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-600/90 backdrop-blur-sm text-[10px] font-semibold text-white uppercase tracking-wider shadow-lg shadow-purple-900/50">
+                            <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Supported
+                        </span>
+                    </div>
+                </div>
+                <div class="p-4 sm:p-5">
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fa-brands fa-roblox text-zinc-500 text-xs"></i>
+                        <span class="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">Roblox</span>
+                    </div>
+                    <h3 class="text-sm sm:text-base font-semibold text-white mb-1">Ride A Pet</h3>
+                    <p class="text-xs text-zinc-500 leading-relaxed">Egg farming, pet hatching, and exploration game. ESP support active for egg locations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RARITY -->
+    <section id="rarity" class="max-w-5xl mx-auto px-4 sm:px-6 pb-20 sm:pb-32 w-full">
+        <div class="mb-8 sm:mb-12 reveal" data-reveal>
+            <h2 class="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-white">Egg Rarity List</h2>
+            <p class="text-zinc-500 text-sm">Daftar 28 egg dan warna ESP-nya.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="rarity-card rounded-xl border border-zinc-800 bg-zinc-900/20 overflow-hidden reveal-scale" data-reveal>
+                <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-zinc-500 shadow-[0_0_8px_rgba(161,161,170,0.6)]"></span>
+                    <h4 class="text-xs font-semibold tracking-wider text-zinc-400 uppercase">Common</h4>
+                    <span class="ml-auto text-[10px] text-zinc-600 font-mono">2</span>
+                </div>
+                <ul class="p-2 sm:p-3 space-y-0.5">
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> White Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Brown Egg</li>
+                </ul>
+            </div>
+            <div class="rarity-card rounded-xl border border-zinc-800 bg-zinc-900/20 overflow-hidden reveal-scale" data-reveal data-delay="80">
+                <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></span>
+                    <h4 class="text-xs font-semibold tracking-wider text-blue-400 uppercase">Rare</h4>
+                    <span class="ml-auto text-[10px] text-zinc-600 font-mono">4</span>
+                </div>
+                <ul class="p-2 sm:p-3 space-y-0.5">
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Cracked Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Easter Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Stone Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Leaf Egg</li>
+                </ul>
+            </div>
+            <div class="rarity-card rounded-xl border border-zinc-800 bg-zinc-900/20 overflow-hidden reveal-scale" data-reveal data-delay="160">
+                <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]"></span>
+                    <h4 class="text-xs font-semibold tracking-wider text-purple-400 uppercase">Epic</h4>
+                    <span class="ml-auto text-[10px] text-zinc-600 font-mono">4</span>
+                </div>
+                <ul class="p-2 sm:p-3 space-y-0.5">
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Mushroom Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Flower Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Slime Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Ice Egg</li>
+                </ul>
+            </div>
+            <div class="rarity-card rounded-xl border border-zinc-800 bg-zinc-900/20 overflow-hidden reveal-scale" data-reveal data-delay="240">
+                <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]"></span>
+                    <h4 class="text-xs font-semibold tracking-wider text-yellow-400 uppercase">Legendary</h4>
+                    <span class="ml-auto text-[10px] text-zinc-600 font-mono">2</span>
+                </div>
+                <ul class="p-2 sm:p-3 space-y-0.5">
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Glass Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Golden Egg</li>
+                </ul>
+            </div>
+            <div class="rarity-card rounded-xl border border-zinc-800 bg-zinc-900/20 overflow-hidden reveal-scale sm:col-span-2" data-reveal data-delay="320">
+                <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></span>
+                    <h4 class="text-xs font-semibold tracking-wider text-red-400 uppercase">Mythic</h4>
+                    <span class="ml-auto text-[10px] text-zinc-600 font-mono">9</span>
+                </div>
+                <ul class="p-2 sm:p-3 grid grid-cols-1 sm:grid-cols-3 gap-0.5">
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Diamond Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Crystal Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Skull Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Asteroid Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Dominus Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Flaming Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Sinister Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Soul Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Tidal Egg</li>
+                </ul>
+            </div>
+            <div class="rarity-card rounded-xl border border-zinc-800 bg-zinc-900/20 overflow-hidden reveal-scale" data-reveal data-delay="400">
+                <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                    <h4 class="text-xs font-semibold tracking-wider text-green-400 uppercase">Divine</h4>
+                    <span class="ml-auto text-[10px] text-zinc-600 font-mono">3</span>
+                </div>
+                <ul class="p-2 sm:p-3 space-y-0.5">
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Aurora Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Galaxy Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Bloom Egg</li>
+                </ul>
+            </div>
+            <div class="rarity-card rounded-xl border border-zinc-800 bg-zinc-900/20 overflow-hidden reveal-scale" data-reveal data-delay="480">
+                <div class="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]"></span>
+                    <h4 class="text-xs font-semibold tracking-wider text-white uppercase">Ethereal</h4>
+                    <span class="ml-auto text-[10px] text-zinc-600 font-mono">4</span>
+                </div>
+                <ul class="p-2 sm:p-3 space-y-0.5">
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Black Hole Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Solaris Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Cherub Egg</li>
+                    <li class="egg-item"><i class="fa-solid fa-egg"></i> Volcanic Egg</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer class="border-t border-zinc-800/50 py-8 text-center text-zinc-600 text-xs px-4 reveal" data-reveal>
+        <p>Egg ESP v10.1 Purple Edition &copy; 2026. Script community · Built for Roblox.</p>
+    </footer>
+
+    <script>
+        const revealElements = document.querySelectorAll('[data-reveal]');
+        const iconElements = document.querySelectorAll('[data-icon]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const delay = entry.target.getAttribute('data-delay') || 0;
+                    setTimeout(() => entry.target.classList.add('active'), parseInt(delay));
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+        revealElements.forEach(el => observer.observe(el));
+        const iconObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('active'), 400);
+                    iconObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        iconElements.forEach(el => iconObserver.observe(el));
+
+        // ==== HAMBURGER MENU ====
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        let menuOpen = false;
+
+        function toggleMenu() {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                mobileMenu.classList.add('open');
+                hamburgerBtn.classList.add('hamburger-active');
+            } else {
+                mobileMenu.classList.remove('open');
+                hamburgerBtn.classList.remove('hamburger-active');
+            }
+        }
+        function closeMenu() {
+            menuOpen = false;
+            mobileMenu.classList.remove('open');
+            hamburgerBtn.classList.remove('hamburger-active');
+        }
+
+        hamburgerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMenu();
+        });
+
+        document.querySelectorAll('.mobile-menu-item').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                var href = item.getAttribute('href');
+                if (href && href !== '#') {
+                    e.preventDefault();
+                    var target = document.querySelector(href);
+                    if (target) {
+                        closeMenu();
+                        setTimeout(function() {
+                            var y = target.getBoundingClientRect().top + window.pageYOffset - 100;
+                            window.scrollTo({ top: y, behavior: 'smooth' });
+                        }, 200);
+                    }
+                } else {
+                    closeMenu();
+                }
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            var nav = document.querySelector('.navbar-float');
+            var menu = document.getElementById('mobileMenu');
+            var btn = document.getElementById('hamburgerBtn');
+            if (menuOpen && !nav.contains(e.target) && !menu.contains(e.target) && !btn.contains(e.target)) {
+                closeMenu();
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768 && menuOpen) closeMenu();
+        });
+    </script>
+</body>
+                          </html>
